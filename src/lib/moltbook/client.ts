@@ -1,186 +1,214 @@
-// ─────────────────────────────────────────────
-// Moltbook API Client
-// Powers agent social actions on moltbook.com
-// ─────────────────────────────────────────────
+/**
+ * Moltbook API Client
+ * 
+ * Integration with Moltbook for AI agent management
+ * https://moltbook.com/api/docs
+ */
 
-const MOLTBOOK_BASE = "https://moltbook.com/api";
-
-export interface MoltbookPost {
-  id: string;
-  content: string;
-  authorUsername: string;
-  authorId: string;
-  likes: number;
-  reposts: number;
-  createdAt: string;
-  community?: string;
-}
-
-export interface MoltbookProfile {
-  id: string;
-  username: string;
-  displayName: string;
-  bio?: string;
-  followerCount: number;
-  followingCount: number;
-  postCount: number;
-  isVerified: boolean;
-  twitterHandle?: string;
-}
+const MOLTBOOK_API_URL = "https://moltbook.com/api/v1";
 
 export interface MoltbookAgent {
   id: string;
   username: string;
-  apiKey: string;
-  isVerified: boolean;
+  displayName: string;
   profileUrl: string;
+  avatarUrl?: string;
+  status: "active" | "paused" | "offline";
+  capabilities: string[];
+  createdAt: string;
 }
 
-// ─── Core API client ─────────────────────────
+export interface MoltbookTask {
+  id: string;
+  agentId: string;
+  type: string;
+  status: "queued" | "running" | "done" | "failed";
+  input: Record<string, unknown>;
+  output?: Record<string, unknown>;
+  error?: string;
+  createdAt: string;
+  completedAt?: string;
+}
+
+export interface MoltbookPost {
+  id: string;
+  agentId: string;
+  content: string;
+  moth: string; // Moltbook community
+  likes: number;
+  replies: number;
+  createdAt: string;
+}
 
 export class MoltbookClient {
   private apiKey: string;
-  private baseUrl: string;
 
-  constructor(apiKey: string, baseUrl = MOLTBOOK_BASE) {
+  constructor(apiKey: string) {
     this.apiKey = apiKey;
-    this.baseUrl = baseUrl;
   }
 
   private async request<T>(
-    path: string,
+    endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`, {
+    const res = await fetch(`${MOLTBOOK_API_URL}${endpoint}`, {
       ...options,
       headers: {
-        Authorization: `Bearer ${this.apiKey}`,
         "Content-Type": "application/json",
+        Authorization: `Bearer ${this.apiKey}`,
         ...options.headers,
       },
     });
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ message: res.statusText }));
-      throw new MoltbookError(
-        err.message ?? `Moltbook API error: ${res.status}`,
-        res.status
-      );
+      const error = await res.text();
+      throw new Error(`Moltbook API error: ${res.status} - ${error}`);
     }
 
     return res.json();
   }
 
-  // ─── Identity ───────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // Agent Methods
+  // ─────────────────────────────────────────────────────────────────────────
 
-  async getProfile(): Promise<MoltbookProfile> {
-    return this.request<MoltbookProfile>("/agent/me");
+  /**
+   * Get the authenticated agent's profile
+   */
+  async getMe(): Promise<MoltbookAgent> {
+    return this.request<MoltbookAgent>("/agent/me");
   }
 
-  async getAgentByUsername(username: string): Promise<MoltbookProfile> {
-    return this.request<MoltbookProfile>(`/users/${username}`);
+  /**
+   * Update agent status
+   */
+  async updateStatus(status: "active" | "paused"): Promise<void> {
+    await this.request("/agent/status", {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
   }
 
-  // ─── Posting ────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // Task Methods
+  // ─────────────────────────────────────────────────────────────────────────
 
-  async createPost(params: {
-    content: string;
-    community?: string; // e.g. "crypto", "ordinals", "nfts"
-    replyTo?: string;   // post ID to reply to
-  }): Promise<MoltbookPost> {
-    return this.request<MoltbookPost>("/posts", {
+  /**
+   * Create a new task for the agent
+   */
+  async createTask(params: {
+    type: string;
+    input: Record<string, unknown>;
+    scheduledFor?: Date;
+  }): Promise<MoltbookTask> {
+    return this.request<MoltbookTask>("/tasks", {
       method: "POST",
       body: JSON.stringify({
-        content: params.content,
-        community: params.community,
-        replyToId: params.replyTo,
+        type: params.type,
+        input: params.input,
+        scheduledFor: params.scheduledFor?.toISOString(),
       }),
     });
   }
 
-  async deletePost(postId: string): Promise<void> {
-    await this.request(`/posts/${postId}`, { method: "DELETE" });
+  /**
+   * Get task status
+   */
+  async getTask(taskId: string): Promise<MoltbookTask> {
+    return this.request<MoltbookTask>(`/tasks/${taskId}`);
   }
 
-  async repost(postId: string): Promise<void> {
-    await this.request(`/posts/${postId}/repost`, { method: "POST" });
+  /**
+   * List recent tasks
+   */
+  async listTasks(params?: {
+    status?: string;
+    limit?: number;
+  }): Promise<MoltbookTask[]> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set("status", params.status);
+    if (params?.limit) searchParams.set("limit", params.limit.toString());
+
+    return this.request<MoltbookTask[]>(`/tasks?${searchParams.toString()}`);
   }
 
-  async likePost(postId: string): Promise<void> {
-    await this.request(`/posts/${postId}/like`, { method: "POST" });
+  /**
+   * Cancel a queued task
+   */
+  async cancelTask(taskId: string): Promise<void> {
+    await this.request(`/tasks/${taskId}/cancel`, { method: "POST" });
   }
 
-  // ─── Feed / Discovery ───────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // Post Methods
+  // ─────────────────────────────────────────────────────────────────────────
 
-  async getFeed(params?: { limit?: number; before?: string }): Promise<MoltbookPost[]> {
-    const qs = new URLSearchParams();
-    if (params?.limit) qs.set("limit", params.limit.toString());
-    if (params?.before) qs.set("before", params.before);
-    return this.request<MoltbookPost[]>(`/feed?${qs}`);
+  /**
+   * Create a post on Moltbook
+   */
+  async createPost(params: {
+    content: string;
+    moth: string; // Community name (e.g., "crypto", "ordinals")
+    replyTo?: string;
+  }): Promise<MoltbookPost> {
+    return this.request<MoltbookPost>("/posts", {
+      method: "POST",
+      body: JSON.stringify(params),
+    });
   }
 
-  async getCommunityFeed(community: string, limit = 20): Promise<MoltbookPost[]> {
-    return this.request<MoltbookPost[]>(`/m/${community}?limit=${limit}`);
+  /**
+   * Get agent's recent posts
+   */
+  async getPosts(limit = 20): Promise<MoltbookPost[]> {
+    return this.request<MoltbookPost[]>(`/posts?limit=${limit}`);
   }
 
-  async searchPosts(query: string, limit = 20): Promise<MoltbookPost[]> {
-    const qs = new URLSearchParams({ q: query, limit: limit.toString() });
-    return this.request<MoltbookPost[]>(`/search?${qs}`);
-  }
+  // ─────────────────────────────────────────────────────────────────────────
+  // Helper Methods
+  // ─────────────────────────────────────────────────────────────────────────
 
-  // ─── Agent-specific ─────────────────────────
-
-  async verifyApiKey(): Promise<boolean> {
+  /**
+   * Verify API key is valid
+   */
+  async verify(): Promise<boolean> {
     try {
-      await this.getProfile();
+      await this.getMe();
       return true;
     } catch {
       return false;
     }
   }
-
-  async getPostById(postId: string): Promise<MoltbookPost> {
-    return this.request<MoltbookPost>(`/posts/${postId}`);
-  }
-
-  async getRecentPosts(username: string, limit = 10): Promise<MoltbookPost[]> {
-    return this.request<MoltbookPost[]>(`/users/${username}/posts?limit=${limit}`);
-  }
 }
 
-// ─── Custom error class ──────────────────────
-
-export class MoltbookError extends Error {
-  constructor(
-    message: string,
-    public statusCode: number
-  ) {
-    super(message);
-    this.name = "MoltbookError";
-  }
-}
-
-// ─── Factory: create client from stored agent ─
-
-export function createMoltbookClient(apiKey: string) {
+/**
+ * Create a Moltbook client for a specific agent
+ */
+export function createMoltbookClient(apiKey: string): MoltbookClient {
   return new MoltbookClient(apiKey);
 }
 
-// ─── Verify & fetch agent info ───────────────
+/**
+ * Pre-built task types for common agent actions
+ */
+export const MoltbookTaskTypes = {
+  // Twitter actions
+  POST_TWEET: "post_tweet",
+  REPLY_MENTION: "reply_mention",
+  DM_FOLLOWER: "dm_follower",
+  FOLLOW_USER: "follow_user",
+  UNFOLLOW_USER: "unfollow_user",
+  
+  // Moltbook actions
+  POST_MOLTBOOK: "post_moltbook",
+  
+  // Analysis
+  MONITOR_KEYWORDS: "monitor_keywords",
+  ANALYZE_COMPETITORS: "analyze_competitors",
+  SENTIMENT_ANALYSIS: "sentiment_analysis",
+  
+  // Custom
+  CUSTOM: "custom",
+} as const;
 
-export async function verifyMoltbookAgent(apiKey: string): Promise<{
-  valid: boolean;
-  profile?: MoltbookProfile;
-  error?: string;
-}> {
-  try {
-    const client = new MoltbookClient(apiKey);
-    const profile = await client.getProfile();
-    return { valid: true, profile };
-  } catch (err) {
-    return {
-      valid: false,
-      error: err instanceof MoltbookError ? err.message : "Failed to connect",
-    };
-  }
-}
+export type MoltbookTaskType = typeof MoltbookTaskTypes[keyof typeof MoltbookTaskTypes];
