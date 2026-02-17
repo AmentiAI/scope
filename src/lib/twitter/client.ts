@@ -134,7 +134,7 @@ export function calculateEngagementRate(
 export function analyzeBestPostingTimes(
   tweets: Array<{
     publishedAt: Date;
-    engagementScore: number;
+    engagementScore: number | null;
   }>
 ) {
   const hourlyData: Record<number, { total: number; count: number }> = {};
@@ -144,7 +144,7 @@ export function analyzeBestPostingTimes(
     if (!hourlyData[hour]) {
       hourlyData[hour] = { total: 0, count: 0 };
     }
-    hourlyData[hour].total += tweet.engagementScore;
+    hourlyData[hour].total += tweet.engagementScore ?? 0;
     hourlyData[hour].count += 1;
   }
 

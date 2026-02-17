@@ -244,19 +244,19 @@ export async function getAvailableCurrencies(): Promise<string[]> {
 export async function getEstimatedPrice(
   amountUsd: number,
   currency: "BTC" | "SOL"
-): Promise<{ estimatedAmount: number; rate: number }> {
+): Promise<{ amount: number; rate: number }> {
   const res = await fetch(
     `${BASE_URL}/estimate?amount=${amountUsd}&currency_from=USD&currency_to=${currency}`,
     { headers: { "x-api-key": API_KEY } }
   );
 
   if (!res.ok) {
-    return { estimatedAmount: 0, rate: 0 };
+    return { amount: 0, rate: 0 };
   }
 
   const data = await res.json();
   return {
-    estimatedAmount: data.estimated_amount ?? 0,
+    amount: data.estimated_amount ?? 0,
     rate: amountUsd / (data.estimated_amount || 1),
   };
 }
