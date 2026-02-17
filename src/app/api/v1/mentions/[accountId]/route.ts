@@ -18,7 +18,7 @@ import { subHours } from "date-fns";
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { accountId: string } }
+  { params }: { params: Promise<{ accountId: string }> }
 ) {
   try {
     const authHeader = req.headers.get("authorization");
@@ -26,7 +26,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { accountId } = params;
+    const { accountId } = await params;
     const hours = parseInt(req.nextUrl.searchParams.get("hours") ?? "48");
     const sentiment = req.nextUrl.searchParams.get("sentiment");
     const limit = Math.min(parseInt(req.nextUrl.searchParams.get("limit") ?? "50"), 200);

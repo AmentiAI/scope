@@ -16,7 +16,7 @@ import { subDays } from "date-fns";
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { accountId: string } }
+  { params }: { params: Promise<{ accountId: string }> }
 ) {
   try {
     const authHeader = req.headers.get("authorization");
@@ -24,7 +24,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { accountId } = params;
+    const { accountId } = await params;
     const days = parseInt(req.nextUrl.searchParams.get("days") ?? "30");
     const since = subDays(new Date(), days);
 
