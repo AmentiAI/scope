@@ -2,6 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── cmdk Command Palette ── */
+[cmdk-dialog] {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 100px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+[cmdk-root] {
+  width: 560px;
+  max-width: 90vw;
+  background: hsl(240 10% 5.5%);
+  border: 1px solid hsl(240 4% 14%);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.04);
+}
+[cmdk-input] {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: hsl(0 0% 95%);
+  font-size: 14px;
+  font-family: inherit;
+}
+[cmdk-input]::placeholder {
+  color: hsl(240 5% 45%);
+}
+[cmdk-group-heading] {
+  padding: 6px 12px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: hsl(240 5% 40%);
+}
+[cmdk-item] {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.1s;
+}
+[cmdk-empty] {
+  text-align: center;
+  color: hsl(240 5% 45%);
+}
+[cmdk-separator] {
+  height: 1px;
+  background: hsl(240 4% 12%);
+  margin: 4px 0;
+}
+
 @layer base {
   :root {
     --background: 240 10% 3.9%;
@@ -170,6 +226,16 @@
   @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Ticker scroll */
+  .ticker-scroll {
+    animation: ticker-scroll 40s linear infinite;
+    will-change: transform;
+  }
+  @keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
   }
 
   /* Stat card hover */

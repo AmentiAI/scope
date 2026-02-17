@@ -12,8 +12,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   TrendingUpIcon, HeartIcon, RepeatIcon, AtSignIcon,
-  CalendarIcon, HashIcon, ClockIcon,
+  CalendarIcon, HashIcon, ClockIcon, DownloadIcon,
 } from "lucide-react"
+import { exportToCsv, analyticsToRows, type FollowerSnapshot } from "@/lib/export"
 
 const RANGE_OPTIONS = [
   { label: "7D", value: 7 },
@@ -97,30 +98,59 @@ export default function AnalyticsPage() {
     rate: Number(((d.engagementRate ?? 0) / 100).toFixed(2)),
   }))
 
+  const handleExport = () => {
+    const snapshots: FollowerSnapshot[] = followerData.map((d) => ({
+      date: d.date,
+      followerCount: d.followerCount,
+      followerDelta: (d as { followerDelta?: number }).followerDelta,
+      engagementRate: (d as { engagementRate?: number }).engagementRate,
+      avgLikes: (d as { avgLikes?: number }).avgLikes,
+      avgRetweets: (d as { avgRetweets?: number }).avgRetweets,
+    }))
+    exportToCsv(
+      analyticsToRows(snapshots),
+      `cryptoscope-analytics-${days}d-${new Date().toISOString().split("T")[0]}`
+    )
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Range selector */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <p className="text-sm text-muted-foreground">Analytics for @{accounts?.[0]?.username ?? "—"}</p>
-        <div className="flex gap-1 p-1 rounded-lg bg-muted/50 border border-white/[0.06]">
-          {RANGE_OPTIONS.map((r) => (
-            <Button
-              key={r.value}
-              size="sm"
-              variant="ghost"
-              className={`h-7 px-3 text-xs font-semibold transition-all ${
-                days === r.value
-                  ? "bg-orange-500/20 text-orange-400 hover:bg-orange-500/25"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-              onClick={() => {
-                setDays(r.value)
-                setPeriod(r.value === 7 ? "7d" : r.value === 30 ? "30d" : "90d")
-              }}
-            >
-              {r.label}
-            </Button>
-          ))}
+        <div className="flex items-center gap-2">
+          {/* Export button */}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 gap-2 px-3 text-xs font-medium border border-white/[0.06] bg-white/[0.03] text-muted-foreground hover:text-foreground"
+            onClick={handleExport}
+            disabled={followerData.length === 0}
+          >
+            <DownloadIcon className="h-3.5 w-3.5" />
+            Export CSV
+          </Button>
+          {/* Range toggles */}
+          <div className="flex gap-1 p-1 rounded-lg bg-muted/50 border border-white/[0.06]">
+            {RANGE_OPTIONS.map((r) => (
+              <Button
+                key={r.value}
+                size="sm"
+                variant="ghost"
+                className={`h-7 px-3 text-xs font-semibold transition-all ${
+                  days === r.value
+                    ? "bg-orange-500/20 text-orange-400 hover:bg-orange-500/25"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                onClick={() => {
+                  setDays(r.value)
+                  setPeriod(r.value === 7 ? "7d" : r.value === 30 ? "30d" : "90d")
+                }}
+              >
+                {r.label}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
 

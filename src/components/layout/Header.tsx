@@ -1,10 +1,11 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { BellIcon, SearchIcon, RefreshCwIcon } from "lucide-react"
+import { RefreshCwIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { UserButton } from "@clerk/nextjs"
-import { Badge } from "@/components/ui/badge"
+import { CommandPalette } from "@/components/ui/command-palette"
+import { NotificationsDrawer } from "@/components/layout/NotificationsDrawer"
 
 const pageMeta: Record<string, { title: string; description: string }> = {
   "/dashboard": { title: "Dashboard", description: "Your crypto creator overview" },
@@ -33,37 +34,21 @@ export function Header() {
 
       {/* Right actions */}
       <div className="flex items-center gap-2">
-        {/* Search */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 gap-2 px-3 text-muted-foreground hover:text-foreground border border-white/[0.06] bg-white/[0.03] rounded-lg hidden sm:flex"
-        >
-          <SearchIcon className="h-3.5 w-3.5" />
-          <span className="text-xs">Search…</span>
-          <Badge variant="outline" className="ml-1 h-4 px-1 text-[9px] border-white/10 text-muted-foreground/60">
-            ⌘K
-          </Badge>
-        </Button>
+        {/* ⌘K Command Palette */}
+        <CommandPalette />
 
         {/* Refresh */}
         <Button
           variant="ghost"
           size="icon"
           className="h-8 w-8 text-muted-foreground hover:text-foreground border border-white/[0.06] bg-white/[0.03] rounded-lg"
+          onClick={() => window.location.reload()}
         >
           <RefreshCwIcon className="h-3.5 w-3.5" />
         </Button>
 
         {/* Notifications */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative h-8 w-8 text-muted-foreground hover:text-foreground border border-white/[0.06] bg-white/[0.03] rounded-lg"
-        >
-          <BellIcon className="h-3.5 w-3.5" />
-          <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-orange-500" />
-        </Button>
+        <NotificationsDrawer />
 
         {/* User */}
         <div className="h-8 w-8 flex items-center justify-center">

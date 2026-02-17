@@ -209,10 +209,12 @@ export default function LandingPage() {
           <Button
             size="lg"
             variant="outline"
-            className="h-12 px-8 text-[15px] border-white/10 hover:bg-white/[0.04] text-muted-foreground hover:text-foreground"
+            className="h-12 px-8 text-[15px] border-white/10 hover:bg-white/[0.06] text-muted-foreground hover:text-foreground gap-2"
             asChild
           >
-            <Link href="#features">See Features</Link>
+            <Link href="/demo">
+              Live Demo →
+            </Link>
           </Button>
         </div>
 
