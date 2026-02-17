@@ -1,71 +1,107 @@
 "use client"
 
-import { ArrowUpIcon, ArrowDownIcon } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
+import { TrendingUpIcon, TrendingDownIcon, MinusIcon } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import type { ReactNode } from "react"
 
 interface StatsCardProps {
   title: string
   value: string | number
   change?: number
-  icon?: React.ReactNode
+  icon: ReactNode
   loading?: boolean
+  suffix?: string
+  description?: string
+  highlight?: boolean
 }
 
-export function StatsCard({ title, value, change, icon, loading }: StatsCardProps) {
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-8 w-8 rounded" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-8 w-32 mb-2" />
-          <Skeleton className="h-3 w-20" />
-        </CardContent>
-      </Card>
-    )
-  }
+function formatValue(v: string | number): string {
+  if (typeof v === "string") return v
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`
+  if (v >= 1_000) return `${(v / 1_000).toFixed(1)}K`
+  return v.toLocaleString()
+}
 
-  const isPositive = change !== undefined && change >= 0
+export function StatsCard({
+  title,
+  value,
+  change,
+  icon,
+  loading = false,
+  suffix,
+  description,
+  highlight = false,
+}: StatsCardProps) {
+  const isPositive = change !== undefined && change > 0
   const isNegative = change !== undefined && change < 0
+  const isNeutral = change !== undefined && change === 0
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <div
+      className={cn(
+        "stat-card relative rounded-xl border bg-card p-5 overflow-hidden shine",
+        highlight && "gradient-border"
+      )}
+    >
+      {/* Subtle bg glow for highlight cards */}
+      {highlight && (
+        <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-orange-500/10 blur-2xl pointer-events-none" />
+      )}
+
+      {/* Top row */}
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {title}
-        </CardTitle>
-        {icon && (
-          <div className="h-8 w-8 flex items-center justify-center rounded bg-muted text-muted-foreground">
-            {icon}
-          </div>
-        )}
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">
-          {typeof value === "number" ? value.toLocaleString() : value}
+        </span>
+        <div
+          className={cn(
+            "flex h-8 w-8 items-center justify-center rounded-lg",
+            highlight
+              ? "bg-gradient-to-br from-orange-500 to-amber-600 text-white"
+              : "bg-muted text-muted-foreground"
+          )}
+        >
+          {icon}
         </div>
-        {change !== undefined && (
-          <p
+      </div>
+
+      {/* Value */}
+      {loading ? (
+        <Skeleton className="h-8 w-24 mb-2" />
+      ) : (
+        <div className="mb-2 animate-fade-in">
+          <span className={cn("text-3xl font-bold tracking-tight", highlight && "gradient-text")}>
+            {formatValue(value)}
+          </span>
+          {suffix && <span className="ml-1 text-sm text-muted-foreground">{suffix}</span>}
+        </div>
+      )}
+
+      {/* Change indicator */}
+      {loading ? (
+        <Skeleton className="h-4 w-20" />
+      ) : change !== undefined ? (
+        <div className="flex items-center gap-1.5">
+          <div
             className={cn(
-              "text-xs flex items-center gap-1 mt-1",
-              isPositive && "text-green-500",
-              isNegative && "text-red-500",
-              !isPositive && !isNegative && "text-muted-foreground"
+              "flex items-center gap-0.5 text-xs font-semibold rounded-full px-1.5 py-0.5",
+              isPositive && "text-emerald-400 bg-emerald-500/10",
+              isNegative && "text-red-400 bg-red-500/10",
+              isNeutral && "text-muted-foreground bg-muted"
             )}
           >
-            {isPositive && <ArrowUpIcon className="h-3 w-3" />}
-            {isNegative && <ArrowDownIcon className="h-3 w-3" />}
-            <span>
-              {isPositive ? "+" : ""}
-              {change.toFixed(1)}% from last period
-            </span>
-          </p>
-        )}
-      </CardContent>
-    </Card>
+            {isPositive && <TrendingUpIcon className="h-3 w-3" />}
+            {isNegative && <TrendingDownIcon className="h-3 w-3" />}
+            {isNeutral && <MinusIcon className="h-3 w-3" />}
+            {isPositive && "+"}
+            {change.toFixed(1)}%
+          </div>
+          <span className="text-xs text-muted-foreground">vs last period</span>
+        </div>
+      ) : description ? (
+        <p className="text-xs text-muted-foreground">{description}</p>
+      ) : null}
+    </div>
   )
 }

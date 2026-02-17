@@ -1,25 +1,15 @@
-import { auth } from "@clerk/nextjs/server"
-import { redirect } from "next/navigation"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { Header } from "@/components/layout/Header"
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const { userId } = auth()
-
-  if (!userId) {
-    redirect("/sign-in")
-  }
-
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="pl-60">
         <Header />
-        <main className="flex-1 p-6 overflow-auto">{children}</main>
+        <main className="p-6 max-w-[1400px]">
+          {children}
+        </main>
       </div>
     </div>
   )

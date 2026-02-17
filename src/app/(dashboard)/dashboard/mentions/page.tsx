@@ -2,33 +2,48 @@
 
 import { useState } from "react"
 import { api } from "@/lib/trpc/client"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   AtSignIcon,
   SmileIcon,
   FrownIcon,
   MinusIcon,
-  TrendingUpIcon,
-  UsersIcon,
-  HeartIcon,
   ExternalLinkIcon,
+  HeartIcon,
+  RepeatIcon,
   SearchIcon,
+  UsersIcon,
+  TrophyIcon,
+  ZapIcon,
 } from "lucide-react"
+import { StatsCard } from "@/components/dashboard/StatsCard"
 
 const SENTIMENT_CONFIG = {
-  positive: { icon: SmileIcon, color: "text-green-500", bg: "bg-green-500/10", label: "Positive" },
-  neutral: { icon: MinusIcon, color: "text-gray-400", bg: "bg-gray-500/10", label: "Neutral" },
-  negative: { icon: FrownIcon, color: "text-red-500", bg: "bg-red-500/10", label: "Negative" },
+  positive: {
+    icon: SmileIcon,
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
+    label: "Positive",
+  },
+  negative: {
+    icon: FrownIcon,
+    color: "text-red-400",
+    bg: "bg-red-500/10 border-red-500/20",
+    label: "Negative",
+  },
+  neutral: {
+    icon: MinusIcon,
+    color: "text-muted-foreground",
+    bg: "bg-muted border-border",
+    label: "Neutral",
+  },
 }
 
 export default function MentionsPage() {
-  const [sentimentFilter, setSentimentFilter] = useState<string>("all")
-  const [hoursFilter, setHoursFilter] = useState("48")
+  const [search, setSearch] = useState("")
+  const [sentiment, setSentiment] = useState<string>("all")
 
   const { data: accounts } = api.analytics.getAccounts.useQuery()
   const accountId = accounts?.[0]?.id
@@ -36,304 +51,236 @@ export default function MentionsPage() {
   const { data: mentionsData, isLoading } = api.community.getMentions.useQuery(
     {
       accountId: accountId!,
-      sentiment: sentimentFilter !== "all" ? (sentimentFilter as any) : undefined,
-      hours: parseInt(hoursFilter),
+      sentiment: sentiment !== "all" ? (sentiment as any) : undefined,
+      limit: 50,
     },
     { enabled: !!accountId }
   )
+  const mentions = mentionsData?.mentions ?? []
 
-  const { data: sentiment } = api.community.getSentimentBreakdown.useQuery(
-    { accountId: accountId!, days: 7 },
+  const { data: topMentioners = [] } = api.community.getTopMentioners.useQuery(
+    { accountId: accountId!, limit: 5 },
     { enabled: !!accountId }
   )
 
-  const { data: timeline } = api.community.getMentionTimeline.useQuery(
-    { accountId: accountId!, days: 14 },
+  const { data: topFans = [] } = api.community.getTopFans.useQuery(
+    { accountId: accountId!, limit: 5 },
     { enabled: !!accountId }
   )
 
-  const { data: topMentioners } = api.community.getTopMentioners.useQuery(
-    { accountId: accountId!, days: 30, limit: 10 },
-    { enabled: !!accountId }
-  )
-
-  const { data: health } = api.community.getCommunityHealth.useQuery(
+  const { data: sentimentBreakdown } = api.community.getSentimentBreakdown.useQuery(
     { accountId: accountId! },
     { enabled: !!accountId }
   )
 
-  const healthColor = (health?.healthScore ?? 0) >= 70 ? "text-green-500" : (health?.healthScore ?? 0) >= 40 ? "text-yellow-500" : "text-red-500"
+  const filtered = mentions.filter(
+    (m: any) =>
+      !search ||
+      m.text.toLowerCase().includes(search.toLowerCase()) ||
+      m.authorUsername?.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const total = sentimentBreakdown?.total ?? 0
+  const getSentCount = (s: string) =>
+    sentimentBreakdown?.breakdown.find((b) => b.sentiment === s)?.count ?? 0
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Community & Mentions</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Monitor what people are saying about you
-        </p>
+    <div className="space-y-6 animate-fade-in">
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatsCard
+          title="Positive Mentions"
+          value={getSentCount("positive")}
+          icon={<SmileIcon className="h-4 w-4" />}
+          description={total > 0 ? `${Math.round((getSentCount("positive") / total) * 100)}% of total` : ""}
+        />
+        <StatsCard
+          title="Neutral Mentions"
+          value={getSentCount("neutral")}
+          icon={<MinusIcon className="h-4 w-4" />}
+        />
+        <StatsCard
+          title="Negative Mentions"
+          value={getSentCount("negative")}
+          icon={<FrownIcon className="h-4 w-4" />}
+        />
       </div>
 
-      {/* Health + Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUpIcon className="h-4 w-4 text-orange-500" />
-              <span className="text-xs text-muted-foreground">Community Health</span>
-            </div>
-            <p className={`text-2xl font-bold ${healthColor}`}>
-              {health?.healthScore ?? "--"}
-            </p>
-            <p className="text-xs text-muted-foreground">{health?.healthLabel}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-2 mb-1">
-              <AtSignIcon className="h-4 w-4 text-blue-500" />
-              <span className="text-xs text-muted-foreground">Mentions (7d)</span>
-            </div>
-            <p className="text-2xl font-bold">{health?.mentionCount7d ?? 0}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-2 mb-1">
-              <SmileIcon className="h-4 w-4 text-green-500" />
-              <span className="text-xs text-muted-foreground">Positive (7d)</span>
-            </div>
-            <p className="text-2xl font-bold text-green-500">{health?.positiveCount ?? 0}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-2 mb-1">
-              <UsersIcon className="h-4 w-4 text-purple-500" />
-              <span className="text-xs text-muted-foreground">Top Fans</span>
-            </div>
-            <p className="text-2xl font-bold">{health?.topFansCount ?? 0}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Sentiment breakdown */}
-      {sentiment && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Sentiment Breakdown (7 days)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-4">
-              {sentiment.breakdown.map((s) => {
-                const config = SENTIMENT_CONFIG[s.sentiment as keyof typeof SENTIMENT_CONFIG] ?? SENTIMENT_CONFIG.neutral
-                const Icon = config.icon
-                return (
-                  <div key={s.sentiment} className={`flex items-center gap-2 px-3 py-2 rounded-lg ${config.bg}`}>
-                    <Icon className={`h-4 w-4 ${config.color}`} />
-                    <div>
-                      <p className={`text-sm font-semibold ${config.color}`}>{s.pct}%</p>
-                      <p className="text-xs text-muted-foreground">{config.label} ({s.count})</p>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            {/* Simple bar */}
-            <div className="flex mt-3 h-2 rounded-full overflow-hidden gap-0.5">
-              {sentiment.breakdown.map((s) => {
-                const bg = s.sentiment === "positive" ? "bg-green-500" : s.sentiment === "negative" ? "bg-red-500" : "bg-gray-500"
-                return (
-                  <div key={s.sentiment} className={`${bg} rounded-sm`} style={{ width: `${s.pct}%` }} />
-                )
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <Tabs defaultValue="feed">
-        <TabsList>
-          <TabsTrigger value="feed">Mentions Feed</TabsTrigger>
-          <TabsTrigger value="top-fans">Top Fans</TabsTrigger>
-          <TabsTrigger value="top-mentioners">Top Mentioners</TabsTrigger>
-        </TabsList>
-
-        {/* FEED */}
-        <TabsContent value="feed" className="space-y-4">
+      <div className="grid xl:grid-cols-3 gap-6">
+        {/* Mentions feed */}
+        <div className="xl:col-span-2 space-y-4">
+          {/* Filters */}
           <div className="flex gap-3">
-            <Select value={sentimentFilter} onValueChange={setSentimentFilter}>
-              <SelectTrigger className="w-36">
-                <SelectValue placeholder="Sentiment" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="positive">Positive</SelectItem>
-                <SelectItem value="neutral">Neutral</SelectItem>
-                <SelectItem value="negative">Negative</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={hoursFilter} onValueChange={setHoursFilter}>
-              <SelectTrigger className="w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="6">Last 6h</SelectItem>
-                <SelectItem value="24">Last 24h</SelectItem>
-                <SelectItem value="48">Last 48h</SelectItem>
-                <SelectItem value="168">Last 7 days</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="relative flex-1">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search mentions..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 bg-card border-white/[0.08] h-9 text-sm"
+              />
+            </div>
+            <div className="flex gap-1 p-1 rounded-lg bg-muted/50 border border-white/[0.06]">
+              {["all", "positive", "neutral", "negative"].map((s) => (
+                <Button
+                  key={s}
+                  size="sm"
+                  variant="ghost"
+                  className={`h-7 px-3 text-xs font-medium capitalize transition-all ${
+                    sentiment === s
+                      ? "bg-orange-500/20 text-orange-400"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  onClick={() => setSentiment(s)}
+                >
+                  {s}
+                </Button>
+              ))}
+            </div>
           </div>
 
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading mentions...</div>
-          ) : mentionsData?.mentions.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <AtSignIcon className="h-10 w-10 mx-auto mb-3 opacity-30" />
-              <p>No mentions found for this period.</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {mentionsData?.mentions.map((mention) => {
-                const config = SENTIMENT_CONFIG[(mention.sentiment ?? "neutral") as keyof typeof SENTIMENT_CONFIG] ?? SENTIMENT_CONFIG.neutral
-                const Icon = config.icon
-                return (
-                  <Card key={mention.id} className="hover:border-orange-500/20 transition-colors">
-                    <CardContent className="py-3 px-4">
-                      <div className="flex items-start gap-3">
-                        <div className={`p-1.5 rounded-full ${config.bg} shrink-0 mt-0.5`}>
-                          <Icon className={`h-3.5 w-3.5 ${config.color}`} />
+          {/* Feed */}
+          <div className="rounded-xl border border-white/[0.06] bg-card overflow-hidden">
+            {isLoading ? (
+              <div className="p-8 text-center text-muted-foreground text-sm">Loading mentions…</div>
+            ) : filtered.length === 0 ? (
+              <div className="p-12 text-center">
+                <AtSignIcon className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30" />
+                <p className="text-sm text-muted-foreground">No mentions found</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-white/[0.04]">
+                {filtered.map((m: any) => {
+                  const sConf = SENTIMENT_CONFIG[m.sentiment as keyof typeof SENTIMENT_CONFIG] ?? SENTIMENT_CONFIG.neutral
+                  const SIcon = sConf.icon
+                  return (
+                    <div key={m.id} className="flex gap-3 p-4 hover:bg-white/[0.02] transition-colors group">
+                      {/* Sentiment icon */}
+                      <div className={`shrink-0 mt-0.5 h-7 w-7 rounded-lg flex items-center justify-center border ${sConf.bg}`}>
+                        <SIcon className={`h-3.5 w-3.5 ${sConf.color}`} />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-semibold">@{m.authorUsername ?? "unknown"}</span>
+                          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 border ${sConf.bg} ${sConf.color}`}>
+                            {sConf.label}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {m.publishedAt ? new Date(m.publishedAt).toLocaleDateString() : ""}
+                          </span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-sm">@{mention.authorUsername}</span>
-                            {mention.authorFollowerCount && (
-                              <span className="text-xs text-muted-foreground">
-                                {mention.authorFollowerCount.toLocaleString()} followers
-                              </span>
-                            )}
-                            <span className="text-xs text-muted-foreground ml-auto">
-                              {mention.createdAt ? new Date(mention.createdAt).toLocaleDateString() : ""}
-                            </span>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{m.text}</p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <HeartIcon className="h-3 w-3 text-pink-500" />
+                            {m.likeCount ?? 0}
                           </div>
-                          <p className="text-sm text-muted-foreground line-clamp-3">{mention.text}</p>
-                          <div className="flex items-center gap-3 mt-2">
-                            {mention.likeCount != null && (
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <HeartIcon className="h-3 w-3" />
-                                {mention.likeCount}
-                              </span>
-                            )}
-                            {"https://twitter.com/user/status/" + mention.id && (
-                              <a
-                                href={"https://twitter.com/user/status/" + mention.id}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-xs text-orange-500 flex items-center gap-1 hover:underline"
-                              >
-                                <ExternalLinkIcon className="h-3 w-3" />
-                                View tweet
-                              </a>
-                            )}
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <RepeatIcon className="h-3 w-3 text-emerald-500" />
+                            {m.retweetCount ?? 0}
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          )}
-        </TabsContent>
 
-        {/* TOP FANS */}
-        <TabsContent value="top-fans">
-          <TopFansTab accountId={accountId} />
-        </TabsContent>
-
-        {/* TOP MENTIONERS */}
-        <TabsContent value="top-mentioners">
-          <div className="space-y-2">
-            {topMentioners?.map((m, i) => (
-              <Card key={m.authorHandle ?? i}>
-                <CardContent className="py-3 px-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-7 w-7 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 text-xs font-bold">
-                        {i + 1}
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">@{m.authorHandle}</p>
-                        {m.authorFollowerCount && (
-                          <p className="text-xs text-muted-foreground">
-                            {m.authorFollowerCount.toLocaleString()} followers
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-sm">{m.mentionCount} mentions</p>
                       <a
-                        href={`https://twitter.com/${m.authorHandle}`}
+                        href={`https://twitter.com/i/web/status/${m.id}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-orange-500 hover:underline"
+                        className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity mt-1"
                       >
-                        View profile
+                        <ExternalLinkIcon className="h-4 w-4 text-muted-foreground hover:text-orange-400 transition-colors" />
                       </a>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  )
+                })}
+              </div>
+            )}
           </div>
-        </TabsContent>
-      </Tabs>
-    </div>
-  )
-}
+        </div>
 
-function TopFansTab({ accountId }: { accountId?: string }) {
-  const { data: fans } = api.community.getTopFans.useQuery(
-    { accountId: accountId!, limit: 20 },
-    { enabled: !!accountId }
-  )
+        {/* Right sidebar */}
+        <div className="space-y-5">
+          {/* Top mentioners */}
+          <div className="rounded-xl border border-white/[0.06] bg-card overflow-hidden">
+            <div className="flex items-center gap-2 px-5 py-4 border-b border-white/[0.04]">
+              <UsersIcon className="h-4 w-4 text-orange-400" />
+              <h3 className="text-sm font-semibold">Top Mentioners</h3>
+            </div>
+            <div className="divide-y divide-white/[0.04]">
+              {!topMentioners.length ? (
+                <p className="p-4 text-xs text-muted-foreground text-center">No data yet</p>
+              ) : topMentioners.map((u: any, i: number) => (
+                <div key={u.username} className="flex items-center gap-3 px-4 py-3">
+                  <div className="h-6 w-6 rounded-md bg-orange-500/10 flex items-center justify-center text-xs font-bold text-orange-400">
+                    {i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold truncate">@{u.username}</p>
+                    <p className="text-[10px] text-muted-foreground">{u.mentionCount} mentions</p>
+                  </div>
+                  <Badge variant="outline" className="text-[10px] border-white/10">
+                    {u.followerCount?.toLocaleString()}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
 
-  if (!fans?.length) {
-    return (
-      <div className="text-center py-12 text-muted-foreground">
-        <UsersIcon className="h-10 w-10 mx-auto mb-3 opacity-30" />
-        <p>No top fans data yet. Data is collected as mentions come in.</p>
-      </div>
-    )
-  }
+          {/* Top fans */}
+          <div className="rounded-xl border border-white/[0.06] bg-card overflow-hidden">
+            <div className="flex items-center gap-2 px-5 py-4 border-b border-white/[0.04]">
+              <TrophyIcon className="h-4 w-4 text-amber-400" />
+              <h3 className="text-sm font-semibold">Top Fans</h3>
+            </div>
+            <div className="divide-y divide-white/[0.04]">
+              {!topFans.length ? (
+                <p className="p-4 text-xs text-muted-foreground text-center">No data yet</p>
+              ) : topFans.map((f: any, i: number) => (
+                <div key={f.id ?? i} className="flex items-center gap-3 px-4 py-3">
+                  <div className="h-6 w-6 rounded-md bg-amber-500/10 flex items-center justify-center text-xs font-bold text-amber-400">
+                    {i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold truncate">@{f.username}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[10px] text-muted-foreground">{f.engagementScore} pts</span>
+                    </div>
+                  </div>
+                  <ZapIcon className="h-3 w-3 text-amber-400" />
+                </div>
+              ))}
+            </div>
+          </div>
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      {fans.map((fan, i) => (
-        <Card key={fan.id} className="hover:border-orange-500/20 transition-colors">
-          <CardContent className="py-3 px-4">
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold text-sm">
-                #{i + 1}
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-sm">@{fan.followerUsername}</p>
-                {fan.followerCount && (
-                  <p className="text-xs text-muted-foreground">
-                    {fan.followerCount.toLocaleString()} followers
-                  </p>
-                )}
-              </div>
-              <div className="text-right">
-                <Badge variant="outline" className="text-orange-500 border-orange-500/30 text-xs">
-                  Score: {fan.engagementScore?.toFixed(1) ?? "–"}
-                </Badge>
+          {/* Sentiment breakdown */}
+          {sentimentBreakdown && total > 0 && (
+            <div className="rounded-xl border border-white/[0.06] bg-card p-5">
+              <h3 className="text-sm font-semibold mb-4">Sentiment Breakdown</h3>
+              <div className="space-y-3">
+                {[
+                  { label: "Positive", value: getSentCount("positive"), color: "bg-emerald-500" },
+                  { label: "Neutral", value: getSentCount("neutral"), color: "bg-gray-500" },
+                  { label: "Negative", value: getSentCount("negative"), color: "bg-red-500" },
+                ].map(({ label, value, color }) => (
+                  <div key={label}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-muted-foreground">{label}</span>
+                      <span className="font-medium">{Math.round((value / total) * 100)}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${color}`}
+                        style={{ width: `${Math.round((value / total) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </CardContent>
-        </Card>
-      ))}
+          )}
+        </div>
+      </div>
     </div>
   )
 }

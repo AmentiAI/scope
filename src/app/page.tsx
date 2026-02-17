@@ -1,449 +1,455 @@
 import Link from "next/link"
 import {
-  ZapIcon,
+  TelescopeIcon,
   TrendingUpIcon,
   UsersIcon,
   BrainIcon,
-  BarChart2Icon,
-  ShieldIcon,
-  CheckIcon,
+  ZapIcon,
+  ShieldCheckIcon,
   ArrowRightIcon,
-  TwitterIcon,
+  CheckIcon,
   StarIcon,
+  BarChart3Icon,
+  SwordsIcon,
+  BellIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
-const FEATURES = [
+const features = [
   {
-    icon: BarChart2Icon,
-    title: "Deep Twitter Analytics",
-    desc: "Track follower growth, engagement rates, impressions, and viral content. See what's working and what's not — in real time.",
-    color: "text-orange-500",
-    bg: "bg-orange-500/10",
+    icon: TrendingUpIcon,
+    title: "Real-Time Analytics",
+    description: "Track follower growth, engagement rates, impressions, and viral content detection with live data updates.",
+    color: "text-orange-400",
+    bg: "bg-orange-500/10 border-orange-500/20",
   },
   {
     icon: UsersIcon,
     title: "Creator CRM",
-    desc: "Manage your collab pipeline like a pro. Track leads, deals, activities, and relationship history in one place.",
-    color: "text-blue-500",
-    bg: "bg-blue-500/10",
-  },
-  {
-    icon: TrendingUpIcon,
-    title: "Competitor Intelligence",
-    desc: "Know exactly how you stack up. Track follower growth, engagement, and content strategy of up to 20 competitors.",
-    color: "text-green-500",
-    bg: "bg-green-500/10",
+    description: "Manage your creator relationships with a full pipeline: from outreach to live collaborations, with activity tracking.",
+    color: "text-blue-400",
+    bg: "bg-blue-500/10 border-blue-500/20",
   },
   {
     icon: BrainIcon,
     title: "AI Agent Automation",
-    desc: "Connect Moltbook agents to post, reply, monitor keywords, and DM followers — all on autopilot.",
-    color: "text-purple-500",
-    bg: "bg-purple-500/10",
+    description: "Connect Moltbook agents to automate replies, schedule tweets, monitor keywords, and DM campaigns 24/7.",
+    color: "text-purple-400",
+    bg: "bg-purple-500/10 border-purple-500/20",
   },
   {
     icon: ZapIcon,
     title: "Content Studio",
-    desc: "AI tweet generator, thread builder, content calendar, and best-time scheduler — built for crypto creators.",
-    color: "text-yellow-500",
-    bg: "bg-yellow-500/10",
+    description: "Generate viral tweets in 5 tones (hype, alpha, educational, controversy, community) powered by OpenAI.",
+    color: "text-amber-400",
+    bg: "bg-amber-500/10 border-amber-500/20",
   },
   {
-    icon: ShieldIcon,
-    title: "Real-time Alerts",
-    desc: "Get notified for viral tweets, follower spikes, negative sentiment, competitor growth, and 10+ more events.",
-    color: "text-red-500",
-    bg: "bg-red-500/10",
+    icon: SwordsIcon,
+    title: "Competitor Intelligence",
+    description: "Track up to 20 competitors side-by-side. Get alerted when a rival has a growth spike before you miss it.",
+    color: "text-red-400",
+    bg: "bg-red-500/10 border-red-500/20",
+  },
+  {
+    icon: BellIcon,
+    title: "Smart Alerts",
+    description: "Milestone notifications, viral tweet alerts, negative sentiment spikes, and weekly performance reports via email.",
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10 border-emerald-500/20",
   },
 ]
 
-const TESTIMONIALS = [
-  {
-    handle: "@cryptobuilder",
-    name: "Crypto Builder",
-    text: "CryptoScope helped me grow from 2K to 20K followers in 3 months by showing me exactly what content was working.",
-    followers: "20.4K followers",
-  },
-  {
-    handle: "@nftcreator_",
-    name: "NFT Creator",
-    text: "The CRM feature is insane. I closed 4 major collabs last month just because I could properly track my outreach.",
-    followers: "45K followers",
-  },
-  {
-    handle: "@ordinalbuilder",
-    name: "Ordinals Builder",
-    text: "The Moltbook agent integration is a game changer. My agent handles replies while I focus on building.",
-    followers: "12K followers",
-  },
-]
-
-const PRICING = [
+const plans = [
   {
     name: "Free",
-    price: 0,
-    features: ["1 account", "7-day history", "Basic analytics", "5 CRM contacts"],
+    price: "$0",
+    period: "",
+    description: "Try it out",
+    features: [
+      "1 Twitter account",
+      "7-day history",
+      "Basic analytics",
+      "5 CRM contacts",
+      "Community access",
+    ],
     cta: "Get Started",
-    variant: "outline" as const,
+    href: "/sign-up",
+    highlight: false,
   },
   {
     name: "Pro",
-    price: 29,
-    features: ["3 accounts", "90-day history", "Full analytics", "500 CRM contacts", "1 AI agent", "Email alerts"],
+    price: "$29",
+    period: "/mo",
+    description: "For serious creators",
+    features: [
+      "3 Twitter accounts",
+      "90-day history",
+      "Full analytics suite",
+      "Unlimited CRM contacts",
+      "1 AI Agent",
+      "10 competitors tracked",
+      "Email alerts",
+      "Content Studio (AI)",
+    ],
     cta: "Start Pro",
-    variant: "default" as const,
+    href: "/sign-up",
     highlight: true,
-    badge: "Most Popular",
   },
   {
     name: "Agency",
-    price: 99,
-    features: ["Unlimited accounts", "Unlimited history", "10 AI agents", "Unlimited CRM", "Team collaboration", "White-label"],
-    cta: "Contact Us",
-    variant: "outline" as const,
+    price: "$99",
+    period: "/mo",
+    description: "For teams & agencies",
+    features: [
+      "Unlimited accounts",
+      "Full history",
+      "Everything in Pro",
+      "10 AI Agents",
+      "Team collaboration",
+      "API access",
+      "Priority support",
+      "Custom integrations",
+    ],
+    cta: "Contact Sales",
+    href: "/sign-up",
+    highlight: false,
+  },
+]
+
+const testimonials = [
+  {
+    quote: "CryptoScope tripled my engagement tracking. I can see exactly which tweets are driving my ordinals community growth.",
+    name: "0xBuilder",
+    handle: "@0xbuilder",
+    followers: "47K followers",
+  },
+  {
+    quote: "The AI agent automation alone is worth 10x the price. My Moltbook agent runs my entire Twitter presence while I sleep.",
+    name: "SatoshiDegen",
+    handle: "@satoshidegen",
+    followers: "128K followers",
+  },
+  {
+    quote: "Finally a CRM that understands crypto creators. The deal pipeline for collabs is exactly what I needed.",
+    name: "NFT_Maxi",
+    handle: "@nft_maxi",
+    followers: "89K followers",
   },
 ]
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* Nav */}
-      <nav className="border-b sticky top-0 bg-background/80 backdrop-blur z-50">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-            <div className="h-7 w-7 rounded-lg bg-orange-500 flex items-center justify-center">
-              <ZapIcon className="h-4 w-4 text-white" />
-            </div>
-            CryptoScope
+      <nav className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-white/[0.04] bg-background/80 backdrop-blur-xl px-6">
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-amber-600">
+            <TelescopeIcon className="h-4 w-4 text-white" />
+          </div>
+          <span className="text-[15px] font-bold tracking-tight">
+            Crypto<span className="gradient-text">Scope</span>
+          </span>
+        </Link>
+
+        <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
+          <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
+          <Link href="#pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+          <Link href="#testimonials" className="hover:text-foreground transition-colors">Reviews</Link>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link href="/sign-in" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            Sign in
           </Link>
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-            <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
-            <Link href="#pricing" className="hover:text-foreground transition-colors">Pricing</Link>
-            <Link href="#testimonials" className="hover:text-foreground transition-colors">Reviews</Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/sign-in">Sign In</Link>
-            </Button>
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white" size="sm" asChild>
-              <Link href="/sign-up">Get Started Free</Link>
-            </Button>
-          </div>
+          <Button
+            className="bg-gradient-to-r from-orange-500 to-amber-500 hover:opacity-90 text-white font-semibold h-9 px-5"
+            asChild
+          >
+            <Link href="/sign-up">Get Started Free</Link>
+          </Button>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="max-w-6xl mx-auto px-4 pt-20 pb-16 text-center">
-        <Badge className="bg-orange-500/10 text-orange-500 border-orange-500/20 mb-6 px-3 py-1">
-          🚀 Built for Crypto Creators
+      <section className="relative flex flex-col items-center justify-center pt-40 pb-28 px-6 text-center overflow-hidden">
+        {/* Background glows */}
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 h-[600px] w-[900px] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-40 left-1/4 h-[300px] w-[300px] bg-amber-500/5 rounded-full blur-[80px] pointer-events-none" />
+
+        <Badge
+          variant="outline"
+          className="mb-6 gap-2 border-orange-500/30 bg-orange-500/10 text-orange-400 text-xs px-4 py-1.5"
+        >
+          <StarIcon className="h-3 w-3" />
+          Built for Crypto Creators & Ordinals Builders
         </Badge>
-        <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight tracking-tight">
-          The CRM built for<br />
-          <span className="text-orange-500">Crypto Creators</span>
+
+        <h1 className="relative text-5xl md:text-7xl font-black tracking-tight leading-[1.05] max-w-4xl mb-6">
+          The CRM built for{" "}
+          <span className="gradient-text">Crypto Creators</span>
         </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-          Track your Twitter growth, manage creator relationships, monitor competitors,
-          and automate your community with AI agents — all in one platform.
+
+        <p className="relative text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed mb-10">
+          Track your Twitter growth, manage creator relationships, monitor competitors, and automate your community with AI agents — all in one platform.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+        <div className="relative flex flex-col sm:flex-row gap-4 items-center">
           <Button
             size="lg"
-            className="bg-orange-500 hover:bg-orange-600 text-white gap-2 text-lg h-12 px-8"
+            className="bg-gradient-to-r from-orange-500 to-amber-500 hover:opacity-90 text-white font-bold h-12 px-8 text-[15px] shadow-2xl shadow-orange-500/25 gap-2"
             asChild
           >
             <Link href="/sign-up">
               Start for Free
-              <ArrowRightIcon className="h-5 w-5" />
+              <ArrowRightIcon className="h-4 w-4" />
             </Link>
           </Button>
-          <Button size="lg" variant="outline" className="h-12 px-8 text-lg" asChild>
-            <Link href="/dashboard">View Demo</Link>
+          <Button
+            size="lg"
+            variant="outline"
+            className="h-12 px-8 text-[15px] border-white/10 hover:bg-white/[0.04] text-muted-foreground hover:text-foreground"
+            asChild
+          >
+            <Link href="#features">See Features</Link>
           </Button>
         </div>
-        <p className="text-sm text-muted-foreground mt-4">
-          No credit card required · Free tier forever · Pay with BTC or SOL
-        </p>
 
         {/* Social proof */}
-        <div className="flex items-center justify-center gap-6 mt-12 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <div className="flex -space-x-2">
-              {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-500 to-red-500 border-2 border-background"
-                  style={{ background: `hsl(${i * 30 + 10} 80% 50%)` }}
-                />
-              ))}
-            </div>
-            <span>500+ creators using CryptoScope</span>
-          </div>
-          <div className="flex items-center gap-1">
-            {[...Array(5)].map((_, i) => (
-              <StarIcon key={i} className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-            ))}
-            <span className="ml-1">4.9/5 rating</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="border-y bg-muted/30">
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[
-              { value: "500+", label: "Active Creators" },
-              { value: "2.4M+", label: "Tweets Analyzed" },
-              { value: "12K+", label: "Competitor Reports" },
-              { value: "$1.2M+", label: "Creator Deals Tracked" },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <p className="text-3xl font-black text-orange-500">{stat.value}</p>
-                <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+        <div className="relative flex items-center gap-3 mt-10 text-sm text-muted-foreground">
+          <div className="flex -space-x-2">
+            {["🦊", "🐉", "⚡", "🎯", "🔥"].map((emoji, i) => (
+              <div
+                key={i}
+                className="h-7 w-7 rounded-full border-2 border-background bg-muted flex items-center justify-center text-xs"
+              >
+                {emoji}
               </div>
             ))}
           </div>
+          <span>Join <strong className="text-foreground">2,400+</strong> crypto creators</span>
+        </div>
+      </section>
+
+      {/* Stats bar */}
+      <section className="border-y border-white/[0.04] bg-white/[0.01] px-6 py-8">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+          {[
+            { value: "2,400+", label: "Active Creators" },
+            { value: "140M+", label: "Tweets Analyzed" },
+            { value: "98%", label: "Uptime SLA" },
+            { value: "$0", label: "To Get Started" },
+          ].map(({ value, label }) => (
+            <div key={label} className="text-center">
+              <div className="text-3xl font-black gradient-text mb-1">{value}</div>
+              <div className="text-sm text-muted-foreground">{label}</div>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* Features */}
-      <section id="features" className="max-w-6xl mx-auto px-4 py-20">
-        <div className="text-center mb-14">
-          <h2 className="text-4xl font-black mb-4">Everything you need to dominate</h2>
+      <section id="features" className="px-6 py-24 max-w-6xl mx-auto">
+        <div className="text-center mb-16">
+          <Badge variant="outline" className="mb-4 border-white/10 text-muted-foreground text-xs">
+            <BarChart3Icon className="h-3 w-3 mr-1.5" />
+            Everything You Need
+          </Badge>
+          <h2 className="text-4xl font-black tracking-tight mb-4">
+            One platform, full control
+          </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Built specifically for crypto creators who want to grow, collaborate, and automate
+            Stop juggling 10 different tools. CryptoScope puts analytics, CRM, AI automation, and competitor tracking in one place.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURES.map((f) => {
-            const Icon = f.icon
-            return (
-              <div
-                key={f.title}
-                className="rounded-xl border bg-card p-6 hover:border-orange-500/30 transition-colors"
-              >
-                <div className={`h-10 w-10 rounded-lg ${f.bg} flex items-center justify-center mb-4`}>
-                  <Icon className={`h-5 w-5 ${f.color}`} />
-                </div>
-                <h3 className="font-bold text-lg mb-2">{f.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
-              </div>
-            )
-          })}
-        </div>
-      </section>
 
-      {/* Feature spotlight: CRM */}
-      <section className="border-y bg-muted/20">
-        <div className="max-w-6xl mx-auto px-4 py-20">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20 mb-4">Creator CRM</Badge>
-              <h2 className="text-4xl font-black mb-4">Manage your collab pipeline like a business</h2>
-              <p className="text-muted-foreground text-lg mb-6">
-                Track every relationship — from first follow to paid partnership. Log DMs, emails, calls, and notes. Never lose a deal to disorganization again.
-              </p>
-              <ul className="space-y-2">
-                {[
-                  "Kanban deal pipeline (Idea → Agreed → Live → Completed)",
-                  "Twitter-linked contact profiles",
-                  "Activity timeline per contact",
-                  "Import contacts from your followers",
-                  "Tag and filter by niche, status, value",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-sm">
-                    <CheckIcon className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {features.map((f) => (
+            <div
+              key={f.title}
+              className="group rounded-2xl border border-white/[0.06] bg-card p-6 hover:border-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20"
+            >
+              <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border ${f.bg} mb-4`}>
+                <f.icon className={`h-5 w-5 ${f.color}`} />
+              </div>
+              <h3 className="font-bold text-[15px] mb-2">{f.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
             </div>
-            <div className="rounded-2xl border bg-card p-6 space-y-3">
-              {[
-                { stage: "Outreach", name: "DeFi Protocol XYZ", value: "$5,000", color: "bg-blue-500" },
-                { stage: "In Talks", name: "NFT Collection Collab", value: "$2,500", color: "bg-yellow-500" },
-                { stage: "Agreed", name: "Token Sponsorship", value: "$10,000", color: "bg-orange-500" },
-                { stage: "Live", name: "Twitter Space Series", value: "$1,500/mo", color: "bg-green-500" },
-              ].map((deal) => (
-                <div key={deal.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/40">
-                  <div className={`h-2 w-2 rounded-full ${deal.color}`} />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{deal.name}</p>
-                    <p className="text-xs text-muted-foreground">{deal.stage}</p>
-                  </div>
-                  <span className="text-sm font-bold text-green-500">{deal.value}</span>
-                </div>
-              ))}
+          ))}
+        </div>
+      </section>
+
+      {/* Crypto payments callout */}
+      <section className="px-6 py-12 max-w-4xl mx-auto">
+        <div className="relative rounded-2xl overflow-hidden gradient-border">
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-amber-500/5" />
+          <div className="relative flex flex-col md:flex-row items-center justify-between gap-6 p-8">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
+                <ShieldCheckIcon className="h-6 w-6 text-orange-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Pay with BTC or SOL</h3>
+                <p className="text-sm text-muted-foreground">
+                  Crypto-native payments accepted — Bitcoin & Solana via NOWPayments. 33% off annual plans.
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Feature spotlight: Agents */}
-      <section className="max-w-6xl mx-auto px-4 py-20">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="order-2 md:order-1 rounded-2xl border bg-card p-6 space-y-3">
-            {[
-              { task: "Reply to @cryptofan mention", status: "✅ Done", time: "2m ago" },
-              { task: "Post thread: Bitcoin halving analysis", status: "✅ Done", time: "1h ago" },
-              { task: "Monitor #Ordinals for alpha", status: "🔄 Running", time: "Now" },
-              { task: "DM 50 new followers", status: "⏳ Queued", time: "In 30m" },
-            ].map((task) => (
-              <div key={task.task} className="flex items-center gap-3 p-3 rounded-lg bg-muted/40">
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{task.task}</p>
-                  <p className="text-xs text-muted-foreground">{task.time}</p>
-                </div>
-                <span className="text-xs">{task.status}</span>
-              </div>
-            ))}
-          </div>
-          <div className="order-1 md:order-2">
-            <Badge className="bg-purple-500/10 text-purple-500 border-purple-500/20 mb-4">AI Agents</Badge>
-            <h2 className="text-4xl font-black mb-4">Let agents do the work while you sleep</h2>
-            <p className="text-muted-foreground text-lg mb-6">
-              Connect your Moltbook agents to CryptoScope and automate your entire Twitter presence. Post, reply, monitor, and engage on autopilot.
-            </p>
-            <ul className="space-y-2">
-              {[
-                "Connect Moltbook agents with one API key",
-                "Schedule tweets and threads ahead of time",
-                "Auto-reply to mentions based on sentiment",
-                "Monitor keywords and alert you to opportunities",
-                "DM campaigns to new followers",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-2 text-sm">
-                  <CheckIcon className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section id="testimonials" className="border-y bg-muted/20">
-        <div className="max-w-6xl mx-auto px-4 py-20">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-black mb-4">Loved by crypto creators</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t) => (
-              <div key={t.handle} className="rounded-xl border bg-card p-6 space-y-4">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <StarIcon key={i} className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">"{t.text}"</p>
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-orange-500/20 flex items-center justify-center">
-                    <TwitterIcon className="h-4 w-4 text-orange-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{t.name}</p>
-                    <p className="text-xs text-muted-foreground">{t.handle} · {t.followers}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+            <Button
+              className="shrink-0 bg-gradient-to-r from-orange-500 to-amber-500 hover:opacity-90 text-white font-semibold gap-2"
+              asChild
+            >
+              <Link href="/sign-up">
+                Get Started
+                <ArrowRightIcon className="h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="max-w-6xl mx-auto px-4 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-black mb-4">Simple, transparent pricing</h2>
-          <p className="text-muted-foreground">Pay with card, BTC, or SOL. No hidden fees.</p>
+      <section id="pricing" className="px-6 py-24 max-w-5xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-black tracking-tight mb-4">Simple, transparent pricing</h2>
+          <p className="text-muted-foreground">
+            No hidden fees. Pay with card, BTC, or SOL.
+          </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {PRICING.map((plan) => (
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`rounded-xl border p-6 space-y-4 relative ${
-                plan.highlight ? "border-orange-500 shadow-lg shadow-orange-500/10" : "border-muted"
+              className={`relative rounded-2xl p-6 border transition-all duration-300 ${
+                plan.highlight
+                  ? "border-orange-500/40 bg-gradient-to-b from-orange-500/10 to-card shadow-2xl shadow-orange-500/10 scale-105"
+                  : "border-white/[0.06] bg-card hover:border-white/10"
               }`}
             >
-              {plan.badge && (
+              {plan.highlight && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-orange-500 text-white px-3">{plan.badge}</Badge>
+                  <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 text-xs px-3">
+                    Most Popular
+                  </Badge>
                 </div>
               )}
-              <div>
-                <h3 className="font-bold text-lg">{plan.name}</h3>
-                <div className="mt-2">
-                  <span className="text-4xl font-black">
-                    {plan.price === 0 ? "Free" : `$${plan.price}`}
-                  </span>
-                  {plan.price > 0 && <span className="text-muted-foreground">/mo</span>}
+
+              <div className="mb-6">
+                <h3 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-1">
+                  {plan.name}
+                </h3>
+                <div className="flex items-end gap-1 mb-1">
+                  <span className="text-4xl font-black">{plan.price}</span>
+                  <span className="text-muted-foreground text-sm pb-1">{plan.period}</span>
                 </div>
+                <p className="text-xs text-muted-foreground">{plan.description}</p>
               </div>
-              <ul className="space-y-2">
+
+              <ul className="space-y-2.5 mb-8">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm">
-                    <CheckIcon className="h-4 w-4 text-green-500 shrink-0" />
-                    {f}
+                  <li key={f} className="flex items-center gap-2.5 text-sm">
+                    <CheckIcon className="h-4 w-4 text-orange-400 shrink-0" />
+                    <span className="text-muted-foreground">{f}</span>
                   </li>
                 ))}
               </ul>
+
               <Button
-                className={`w-full ${plan.highlight ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}`}
-                variant={plan.variant}
+                className={`w-full font-semibold h-10 ${
+                  plan.highlight
+                    ? "bg-gradient-to-r from-orange-500 to-amber-500 hover:opacity-90 text-white shadow-lg shadow-orange-500/20"
+                    : "bg-white/[0.06] hover:bg-white/[0.10] text-foreground border border-white/10"
+                }`}
                 asChild
               >
-                <Link href="/sign-up">{plan.cta}</Link>
+                <Link href={plan.href}>{plan.cta}</Link>
               </Button>
             </div>
           ))}
         </div>
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          💰 Also accept Bitcoin (BTC) and Solana (SOL) payments via NOWPayments
-        </p>
+      </section>
+
+      {/* Testimonials */}
+      <section id="testimonials" className="px-6 py-24 max-w-5xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-black tracking-tight mb-4">Loved by crypto builders</h2>
+          <p className="text-muted-foreground">Real results from the community</p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {testimonials.map((t) => (
+            <div key={t.handle} className="rounded-2xl border border-white/[0.06] bg-card p-6">
+              {/* Stars */}
+              <div className="flex gap-0.5 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <StarIcon key={i} className="h-4 w-4 fill-orange-400 text-orange-400" />
+                ))}
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                "{t.quote}"
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-orange-500/30 to-amber-500/20 flex items-center justify-center text-sm font-bold text-orange-400">
+                  {t.name[0]}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{t.name}</p>
+                  <p className="text-xs text-muted-foreground">{t.handle} · {t.followers}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* CTA */}
-      <section className="border-t bg-orange-500">
-        <div className="max-w-6xl mx-auto px-4 py-20 text-center text-white">
-          <h2 className="text-4xl font-black mb-4">Ready to level up your crypto presence?</h2>
-          <p className="text-orange-100 text-lg mb-8 max-w-xl mx-auto">
-            Join 500+ crypto creators using CryptoScope to grow faster, collaborate smarter, and automate more.
-          </p>
-          <Button
-            size="lg"
-            className="bg-white text-orange-500 hover:bg-orange-50 font-bold text-lg h-12 px-10"
-            asChild
-          >
-            <Link href="/sign-up">
-              Get Started Free Today
-              <ArrowRightIcon className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
-          <p className="text-orange-200 text-sm mt-4">No credit card required</p>
+      <section className="px-6 pb-32 max-w-3xl mx-auto text-center">
+        <div className="relative rounded-3xl overflow-hidden gradient-border p-12">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-amber-500/5" />
+          <div className="absolute -top-20 left-1/2 -translate-x-1/2 h-40 w-40 bg-orange-500/20 rounded-full blur-3xl" />
+          <div className="relative">
+            <h2 className="text-4xl font-black tracking-tight mb-4">
+              Ready to scale your<br />
+              <span className="gradient-text">crypto presence?</span>
+            </h2>
+            <p className="text-muted-foreground mb-8">
+              Join 2,400+ crypto creators using CryptoScope to grow faster.
+            </p>
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-orange-500 to-amber-500 hover:opacity-90 text-white font-bold h-12 px-10 text-[15px] shadow-2xl shadow-orange-500/30 gap-2"
+              asChild
+            >
+              <Link href="/sign-up">
+                Start for Free Today
+                <ArrowRightIcon className="h-4 w-4" />
+              </Link>
+            </Button>
+            <p className="text-xs text-muted-foreground mt-4">No credit card required · BTC & SOL accepted</p>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t">
-        <div className="max-w-6xl mx-auto px-4 py-10">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2 font-bold">
-              <div className="h-6 w-6 rounded bg-orange-500 flex items-center justify-center">
-                <ZapIcon className="h-3.5 w-3.5 text-white" />
-              </div>
-              CryptoScope
+      <footer className="border-t border-white/[0.04] px-6 py-8">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-orange-500 to-amber-600">
+              <TelescopeIcon className="h-3 w-3 text-white" />
             </div>
-            <div className="flex gap-6 text-sm text-muted-foreground">
-              <Link href="/sign-in" className="hover:text-foreground">Sign In</Link>
-              <Link href="/sign-up" className="hover:text-foreground">Sign Up</Link>
-              <Link href="/dashboard" className="hover:text-foreground">Dashboard</Link>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              © 2026 CryptoScope. Built for Web3 creators.
-            </p>
+            <span className="text-sm font-bold">
+              Crypto<span className="gradient-text">Scope</span>
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            © 2025 CryptoScope. Built for the community.
+          </p>
+          <div className="flex gap-6 text-xs text-muted-foreground">
+            <Link href="#" className="hover:text-foreground transition-colors">Privacy</Link>
+            <Link href="#" className="hover:text-foreground transition-colors">Terms</Link>
+            <Link href="#" className="hover:text-foreground transition-colors">Discord</Link>
           </div>
         </div>
       </footer>
