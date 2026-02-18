@@ -9,7 +9,15 @@ import { ZodError } from "zod";
 // ─── Create context ───────────────────────────
 
 export async function createTRPCContext(opts: { headers: Headers }) {
-  const { userId } = auth();
+  // auth() is safe to call even without Clerk configured — returns { userId: null }
+  let userId: string | null = null;
+  try {
+    const authResult = auth();
+    userId = authResult.userId ?? null;
+  } catch {
+    // Clerk not configured or key is invalid — treat as unauthenticated
+    userId = null;
+  }
 
   return {
     db,
