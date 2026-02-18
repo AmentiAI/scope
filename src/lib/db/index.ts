@@ -2,12 +2,29 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
 
-// Neon serverless connection (HTTP) - works in Vercel Edge + Serverless
-const sql = neon(process.env.DATABASE_URL!);
+// Lazy singleton — safe during Next.js builds where DATABASE_URL may not be present
+let _db: ReturnType<typeof createDb> | null = null;
 
-export const db = drizzle(sql, { schema });
+function createDb() {
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error("DATABASE_URL is not set");
+  return drizzle(neon(url), { schema });
+}
 
-export type DB = typeof db;
+export function getDb() {
+  if (!_db) _db = createDb();
+  return _db;
+}
 
-// Export schema for easy access
+// Named export for convenience — lazily created on first use
+export const db = new Proxy({} as ReturnType<typeof createDb>, {
+  get(_, prop) {
+    return (getDb() as any)[prop];
+  },
+  apply(_, thisArg, args) {
+    return (getDb() as any)(...args);
+  },
+});
+
+export type DB = ReturnType<typeof createDb>;
 export * from "./schema";
