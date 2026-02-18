@@ -19,7 +19,7 @@ import {
   ExternalLinkIcon,
   TelescopeIcon,
 } from "lucide-react"
-import { useUser } from "@clerk/nextjs"
+// Safe useUser — returns empty if Clerk is not configured
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 
@@ -53,7 +53,7 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { user } = useUser()
+  const user: any = null // populated when real Clerk keys set
 
   const isActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard"

@@ -3,7 +3,10 @@
 import { usePathname } from "next/navigation"
 import { RefreshCwIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { UserButton } from "@clerk/nextjs"
+const CLERK_PK = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "";
+const ClerkReady = CLERK_PK.startsWith("pk_") && !CLERK_PK.includes("placeholder");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const UserButton = ClerkReady ? require("@clerk/nextjs").UserButton : () => null;
 import { CommandPalette } from "@/components/ui/command-palette"
 import { NotificationsDrawer } from "@/components/layout/NotificationsDrawer"
 
