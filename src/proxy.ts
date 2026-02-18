@@ -8,8 +8,20 @@ function isPublicPath(pathname: string) {
 }
 
 // Only protect with Clerk if we have a real publishable key
+// Real Clerk keys decode to domains ending in .clerk.accounts.dev or .clerk.com
 const CLERK_PK = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "";
-const isRealClerkKey = CLERK_PK.startsWith("pk_") && CLERK_PK.length > 30 && !CLERK_PK.includes("placeholder");
+function isRealKey(pk: string): boolean {
+  if (!pk.startsWith("pk_")) return false;
+  if (pk.includes("placeholder")) return false;
+  try {
+    const b64 = pk.replace(/^pk_test_|^pk_live_/, "");
+    const decoded = Buffer.from(b64, "base64").toString("utf-8").replace(/\$$/, "");
+    return decoded.includes(".clerk.accounts.dev") || decoded.includes(".clerk.com");
+  } catch {
+    return false;
+  }
+}
+const isRealClerkKey = isRealKey(CLERK_PK);
 
 let clerkHandler: ((req: NextRequest) => any) | null = null;
 
