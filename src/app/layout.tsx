@@ -25,9 +25,15 @@ export const metadata: Metadata = {
   },
 }
 
+// Fallback key keeps ClerkProvider happy during builds / demo mode
+// Replace with real key from https://dashboard.clerk.com
+const CLERK_PK =
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+  "pk_test_Y2xlcmsuY3J5cHRvc2NvcGUuaW8k";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider publishableKey={CLERK_PK}>
       <html lang="en" className="dark" suppressHydrationWarning>
         <body className={`${inter.variable} font-sans antialiased`}>
           <TRPCProvider>
