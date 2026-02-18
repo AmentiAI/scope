@@ -4,9 +4,19 @@ import { usePathname } from "next/navigation"
 import { RefreshCwIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 const CLERK_PK = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "";
-const ClerkReady = CLERK_PK.startsWith("pk_") && !CLERK_PK.includes("placeholder");
+
+// Must match the same check as layout.tsx — Clerk v5 UserButton crashes outside ClerkProvider
+function isRealClerkKey(pk: string): boolean {
+  if (!pk.startsWith("pk_")) return false;
+  try {
+    const b64 = pk.replace(/^pk_test_|^pk_live_/, "");
+    const decoded = atob(b64).replace(/\$$/, "");
+    return decoded.includes(".clerk.accounts.dev") || decoded.includes(".clerk.com");
+  } catch { return false; }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const UserButton = ClerkReady ? require("@clerk/nextjs").UserButton : () => null;
+const UserButton = isRealClerkKey(CLERK_PK) ? require("@clerk/nextjs").UserButton : () => null;
 import { CommandPalette } from "@/components/ui/command-palette"
 import { NotificationsDrawer } from "@/components/layout/NotificationsDrawer"
 
